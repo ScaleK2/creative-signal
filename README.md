@@ -50,27 +50,10 @@ cd creative-signal
 ### 2) Create virtual environment
 
 #### Windows
-Use the activation command for your shell:
-
-**Command Prompt (cmd.exe)**
-```bat
-python -m venv .venv
-.venv\Scripts\activate.bat
-```
-
-**PowerShell**
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-```
-
-**Git Bash**
 ```bash
 python -m venv .venv
-source .venv/Scripts/activate
+.venv\Scripts\activate
 ```
-
-> Note: In Windows cmd, `.venv/Scripts/activate` fails because cmd expects backslashes and `activate.bat`.
 
 #### macOS / Linux
 ```bash
@@ -112,6 +95,7 @@ You can still run each script directly when needed.
 
 Download and extract MP3 audio from a YouTube URL or playlist URL.
 
+**Git Bash**
 ```bash
 python scripts/transcribe_url.py "YOUTUBE_URL"
 ```
@@ -226,3 +210,4 @@ From `requirements.txt`:
 - openai
 - python-dotenv
 - yt-dlp
+
