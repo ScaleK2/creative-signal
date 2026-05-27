@@ -16,341 +16,213 @@ The goal is to build structured content intelligence workflows for:
 
 ---
 
-# Features
+## Recommended Usage (Menu-First)
 
-## 1. Download Audio From YouTube URLs
+The **primary way to use this project** is the interactive menu:
 
-Download and extract high-quality MP3 audio locally.
+```bash
+python scripts/run.py
+```
 
-Script:
+You can then choose:
+1. Download audio from URL
+2. Transcribe downloaded audio
+3. Download + transcribe
+4. Analyse transcript
+5. Exit
+
+Why this is recommended:
+- Easier day-to-day workflow
+- Guided prompts for required inputs
+- Uses the same active Python interpreter for all subprocess calls
+
+---
+
+## Setup
+
+### 1) Clone repo
+
+```bash
+git clone https://github.com/YOUR_USERNAME/creative-signal.git
+cd creative-signal
+```
+
+### 2) Create virtual environment
+
+#### Windows
+Use the activation command for your shell:
+
+**Command Prompt (cmd.exe)**
+```bat
+python -m venv .venv
+.venv\Scripts\activate.bat
+```
+
+**PowerShell**
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+**Git Bash**
+```bash
+python -m venv .venv
+source .venv/Scripts/activate
+```
+
+> Note: In Windows cmd, `.venv/Scripts/activate` fails because cmd expects backslashes and `activate.bat`.
+
+#### macOS / Linux
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### 3) Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4) Configure OpenAI key
+
+Create a `.env` file in project root:
+
+```env
+OPENAI_API_KEY=your_api_key_here
+```
+
+Do **not** commit `.env`.
+
+### 5) Verify FFmpeg
+
+```bash
+ffmpeg -version
+```
+
+If missing, install from: https://ffmpeg.org/download.html
+
+---
+
+## Direct Script Usage (Advanced)
+
+You can still run each script directly when needed.
+
+### 1) Download audio (`scripts/transcribe_url.py`)
+
+Download and extract MP3 audio from a YouTube URL or playlist URL.
+
 ```bash
 python scripts/transcribe_url.py "YOUTUBE_URL"
 ```
 
-Outputs:
-```text
-output/audio/
-```
+Options:
+- `--force` overwrite existing matching video folder
+- `--output PATH` custom output directory
 
-Use cases:
-- podcast archiving
-- creator research
-- offline listening
-- transcript preparation
-- future AI workflows
+Creates one folder per video under `output/` with:
+- `<video_title>.mp3`
+- `metadata.info.json` (if available)
 
 ---
 
-## 2. Transcribe Downloaded Audio
+### 2) Transcribe downloaded audio (`scripts/transcribe_audio.py`)
 
-Generate local transcripts using Faster Whisper.
+Transcribe existing MP3 files inside `output/<video_folder>/`.
 
-Script:
 ```bash
 python scripts/transcribe_audio.py
 ```
 
-Outputs:
-```text
-output/transcripts/
-```
+Useful options:
+- `--model tiny|base|small|medium|large-v3`
+- `--folder VIDEO_FOLDER_NAME` (transcribe one folder)
+- `--force` (re-transcribe even if transcript files exist)
+- `--output PATH`
 
-Generated files:
-- `.txt` → human-readable transcript
-- `.json` → structured machine-readable transcript
+Outputs in each video folder:
+- `transcript.txt`
+- `transcript.json`
 
-JSON includes:
-- raw seconds
-- formatted timestamps
-- transcript segments
-
-Example:
-```json
-{
-  "start_seconds": 741.14,
-  "end_seconds": 743.70,
-  "start_timestamp": "00:12:21",
-  "end_timestamp": "00:12:23",
-  "text": "So, I'm writing a book right now,"
-}
-```
+`transcript.json` includes segment timestamps and source metadata fields.
 
 ---
 
-## 3. Full Pipeline
+### 3) Full pipeline (`scripts/transcribe_full.py`)
 
-Download audio + transcribe automatically.
+Download + transcribe in one command.
 
-Script:
 ```bash
 python scripts/transcribe_full.py "YOUTUBE_URL"
 ```
 
-Outputs:
-```text
-output/audio/
-output/transcripts/
-```
+Useful options:
+- `--model tiny|base|small|medium|large-v3`
+- `--force`
+- `--output PATH`
 
 ---
 
-## 4. Transcript Analysis
+### 4) Transcript analysis (`scripts/analyse_transcript.py`)
 
-Analyse transcript structure using OpenAI models.
+Generate a structured content-intelligence report from a transcript.
 
-Script:
 ```bash
-python scripts/analyse_transcript.py "TRANSCRIPT_JSON_PATH"
+python scripts/analyse_transcript.py "VIDEO_FOLDER_NAME"
 ```
 
-Example:
-```bash
-python scripts/analyse_transcript.py "output/transcripts/video.json"
-```
+Also accepts transcript file path/name as input.
 
-Outputs:
-```text
-output/analysis/
-```
+Useful options:
+- `--model MODEL_NAME` (default: `gpt-4.1-mini`)
+- `--output PATH`
 
-Analysis includes:
-- hook analysis
-- persuasion patterns
-- content opportunities
-- structure breakdowns
-- remix ideas
-- content strategy insights
+Analysis output is saved under each video folder in:
+- `analysis/<timestamp>/analysis.md`
+- `analysis/<timestamp>/prompt.txt`
+- `analysis/<timestamp>/metadata.json`
+
+Includes:
+- Executive summary
+- Core message
+- Hook analysis
+- Structure breakdown
+- Persuasion patterns
+- Content opportunities
+- Remix ideas
+- Strategic takeaway
 
 ---
 
-# Project Structure
+## Project Structure
 
 ```text
 creative-signal/
-│
 ├── scripts/
-│   ├── transcribe_audio.py
+│   ├── run.py
 │   ├── transcribe_url.py
+│   ├── transcribe_audio.py
 │   ├── transcribe_full.py
 │   └── analyse_transcript.py
-│
 ├── output/
-│   ├── audio/
-│   ├── transcripts/
-│   └── analysis/
-│
+│   └── <video_folder>/
+│       ├── <video_title>.mp3
+│       ├── metadata.info.json
+│       ├── transcript.txt
+│       ├── transcript.json
+│       └── analysis/
 ├── .env.example
-├── .gitignore
 ├── requirements.txt
 └── README.md
 ```
 
 ---
 
-# Setup
+## Requirements
 
-## 1. Clone Repo
+From `requirements.txt`:
 
-```bash
-git clone https://github.com/YOUR_USERNAME/creative-signal.git
-
-cd creative-signal
-```
-
-##Quickstart
-
-After cloning repo,
-
-```bash
-cd creative-signal
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-```
-
----
-
-## 2. Create Virtual Environment
-
-This project uses a Python virtual environment (`.venv`) to keep project dependencies isolated from the rest of the machine.
-
-A virtual environment is a local Python workspace. It means packages like `yt-dlp`, `faster-whisper`, `openai`, and `python-dotenv` are installed only for this project, rather than globally across the computer.
-
-Do not commit `.venv` to GitHub.
-
-The `.venv/` folder is ignored by `.gitignore`.
-
----
-
-### Windows
-
-```bash
-python -m venv .venv
-
-.venv\Scripts\activate
-```
-
-### Mac/Linux
-
-```bash
-python3 -m venv .venv
-
-source .venv/bin/activate
-```
-
----
-
-## 3. Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
----
-
-# Requirements
-
-## Python Packages
-
-Defined in:
-```text
-requirements.txt
-```
-
-Current packages:
-```text
-faster-whisper
-openai
-python-dotenv
-yt-dlp
-```
-
----
-
-# FFmpeg Installation
-
-FFmpeg is required for audio extraction.
-
-Check installation:
-```bash
-ffmpeg -version
-```
-
-If FFmpeg is not installed:
-https://ffmpeg.org/download.html
-
----
-
-# OpenAI API Setup
-
-Create:
-```text
-.env
-```
-
-Example:
-```env
-OPENAI_API_KEY=your_api_key_here
-```
-
-Do NOT commit `.env` to GitHub.
-
----
-
-# Whisper Models
-
-Supported models:
-- tiny
-- base
-- small
-- medium
-- large-v3
-
-Example:
-```bash
-python scripts/transcribe_full.py "YOUTUBE_URL" --model small
-```
-
-Larger models:
-- better quality
-- slower processing
-
----
-
-# Notes
-
-## Transcript Formats
-
-TXT:
-- human readable
-- easier manual review
-
-JSON:
-- structured AI workflows
-- semantic analysis
-- future vector indexing
-- clip extraction
-- retrieval systems
-
----
-
-## Why Separate Scripts?
-
-The pipeline is intentionally modular.
-
-### `transcribe_url.py`
-Handles:
-```text
-URL → MP3
-```
-
-Useful independently for:
-- offline listening
-- audio collection
-- dataset building
-- future workflows
-
-### `transcribe_audio.py`
-Handles:
-```text
-MP3 → Transcript
-```
-
-### `transcribe_full.py`
-Handles:
-```text
-URL → MP3 → Transcript
-```
-
-This modular structure allows:
-- reusable workflows
-- easier debugging
-- future scalability
-- interchangeable pipeline stages
-
----
-
-# Future Directions
-
-Potential future layers:
-- hook classification
-- persuasion analysis
-- semantic chunking
-- embeddings
-- vector search
-- creator fingerprinting
-- clip extraction
-- viral structure analysis
-- AI remix generation
-
----
-
-# Disclaimer
-
-This project is for educational and research purposes.
-
-Ensure you comply with:
-- platform terms of service
-- copyright laws
-- creator rights
-- content licensing requirements
+- faster-whisper
+- openai
+- python-dotenv
+- yt-dlp
