@@ -1,9 +1,11 @@
 import subprocess
+import sys
 from pathlib import Path
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 OUTPUT_DIR = PROJECT_ROOT / "output"
+PYTHON_EXE = sys.executable
 
 
 def run_command(command: list[str]) -> None:
@@ -27,7 +29,7 @@ def download_audio() -> None:
 
     force = input("Force overwrite existing matching folder? (y/n): ").strip().lower() == "y"
 
-    command = ["python", "scripts/transcribe_url.py", url]
+    command = [PYTHON_EXE, "scripts/transcribe_url.py", url]
 
     if force:
         command.append("--force")
@@ -37,10 +39,45 @@ def download_audio() -> None:
 
 def transcribe_audio() -> None:
     model = input("\nWhisper model [base/small/medium/large-v3] (default: base): ").strip()
-    folder = input("Specific video folder name? Leave blank to transcribe all pending: ").strip()
     force = input("Force re-transcribe existing files? (y/n): ").strip().lower() == "y"
+    folder = ""
 
-    command = ["python", "scripts/transcribe_audio.py"]
+    available_folders = []
+
+    if OUTPUT_DIR.exists():
+        for candidate in sorted(OUTPUT_DIR.iterdir()):
+            if not candidate.is_dir():
+                continue
+            if candidate.name.startswith("_"):
+                continue
+            if any(candidate.glob("*.mp3")):
+                available_folders.append(candidate)
+
+    if available_folders:
+        print("\nAvailable video folders with MP3:")
+        print("0. All pending folders")
+        for index, candidate in enumerate(available_folders, start=1):
+            print(f"{index}. {candidate.name}")
+
+        choice = input("\nChoose folder number (default: 0): ").strip()
+
+        if not choice:
+            choice = "0"
+
+        if not choice.isdigit():
+            print("Invalid choice. Continuing with all pending folders.")
+        else:
+            selected_index = int(choice)
+            if selected_index == 0:
+                folder = ""
+            elif 1 <= selected_index <= len(available_folders):
+                folder = available_folders[selected_index - 1].name
+            else:
+                print("Choice out of range. Continuing with all pending folders.")
+    else:
+        folder = input("Specific video folder name? Leave blank to transcribe all pending: ").strip()
+
+    command = [PYTHON_EXE, "scripts/transcribe_audio.py"]
 
     if model:
         command.extend(["--model", model])
@@ -64,7 +101,7 @@ def full_pipeline() -> None:
     model = input("Whisper model [base/small/medium/large-v3] (default: base): ").strip()
     force = input("Force overwrite/re-transcribe? (y/n): ").strip().lower() == "y"
 
-    command = ["python", "scripts/transcribe_full.py", url]
+    command = [PYTHON_EXE, "scripts/transcribe_full.py", url]
 
     if model:
         command.extend(["--model", model])
@@ -123,7 +160,7 @@ def analyse_transcript() -> None:
 
     model = input("OpenAI model (default: gpt-4.1-mini): ").strip()
 
-    command = ["python", "scripts/analyse_transcript.py", selected_folder]
+    command = [PYTHON_EXE, "scripts/analyse_transcript.py", selected_folder]
 
     if model:
         command.extend(["--model", model])

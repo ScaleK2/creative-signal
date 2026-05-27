@@ -75,7 +75,7 @@ def organise_downloads(staging_dir: Path, output_dir: Path, force: bool = False)
 
         video_dir.mkdir(parents=True, exist_ok=True)
 
-        target_audio_path = video_dir / "audio.mp3"
+        target_audio_path = video_dir / audio_file.name
         shutil.move(str(audio_file), str(target_audio_path))
 
         metadata_source = staging_dir / f"{audio_file.stem}.info.json"
