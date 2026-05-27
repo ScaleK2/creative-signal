@@ -39,8 +39,43 @@ def download_audio() -> None:
 
 def transcribe_audio() -> None:
     model = input("\nWhisper model [base/small/medium/large-v3] (default: base): ").strip()
-    folder = input("Specific video folder name? Leave blank to transcribe all pending: ").strip()
     force = input("Force re-transcribe existing files? (y/n): ").strip().lower() == "y"
+    folder = ""
+
+    available_folders = []
+
+    if OUTPUT_DIR.exists():
+        for candidate in sorted(OUTPUT_DIR.iterdir()):
+            if not candidate.is_dir():
+                continue
+            if candidate.name.startswith("_"):
+                continue
+            if any(candidate.glob("*.mp3")):
+                available_folders.append(candidate)
+
+    if available_folders:
+        print("\nAvailable video folders with MP3:")
+        print("0. All pending folders")
+        for index, candidate in enumerate(available_folders, start=1):
+            print(f"{index}. {candidate.name}")
+
+        choice = input("\nChoose folder number (default: 0): ").strip()
+
+        if not choice:
+            choice = "0"
+
+        if not choice.isdigit():
+            print("Invalid choice. Continuing with all pending folders.")
+        else:
+            selected_index = int(choice)
+            if selected_index == 0:
+                folder = ""
+            elif 1 <= selected_index <= len(available_folders):
+                folder = available_folders[selected_index - 1].name
+            else:
+                print("Choice out of range. Continuing with all pending folders.")
+    else:
+        folder = input("Specific video folder name? Leave blank to transcribe all pending: ").strip()
 
     command = [PYTHON_EXE, "scripts/transcribe_audio.py"]
 
