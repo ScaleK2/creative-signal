@@ -85,7 +85,7 @@ def organise_downloads(staging_dir: Path, output_dir: Path, force: bool = False)
 
         video_dir.mkdir(parents=True, exist_ok=True)
 
-        target_audio_path = video_dir / "audio.mp3"
+        target_audio_path = video_dir / audio_file.name
         shutil.move(str(audio_file), str(target_audio_path))
 
         metadata_source = staging_dir / f"{audio_file.stem}.info.json"
@@ -133,12 +133,23 @@ def extract_metadata_fields(metadata: dict) -> dict:
     }
 
 
+
+
+def find_audio_file(video_dir: Path) -> Path:
+    mp3_files = sorted(video_dir.glob("*.mp3"))
+
+    if not mp3_files:
+        raise FileNotFoundError(f"No MP3 file found in: {video_dir}")
+
+    return mp3_files[0]
+
+
 def transcript_exists(video_dir: Path) -> bool:
     return (video_dir / "transcript.txt").exists() and (video_dir / "transcript.json").exists()
 
 
 def transcribe_video_folder(video_dir: Path, model: WhisperModel, model_size: str) -> None:
-    audio_path = video_dir / "audio.mp3"
+    audio_path = find_audio_file(video_dir)
     metadata = load_metadata(video_dir)
     source_metadata = extract_metadata_fields(metadata)
 
