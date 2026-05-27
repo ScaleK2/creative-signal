@@ -1,9 +1,11 @@
 import subprocess
+import sys
 from pathlib import Path
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 OUTPUT_DIR = PROJECT_ROOT / "output"
+PYTHON_EXE = sys.executable
 
 
 def run_command(command: list[str]) -> None:
@@ -27,7 +29,7 @@ def download_audio() -> None:
 
     force = input("Force overwrite existing matching folder? (y/n): ").strip().lower() == "y"
 
-    command = ["python", "scripts/transcribe_url.py", url]
+    command = [PYTHON_EXE, "scripts/transcribe_url.py", url]
 
     if force:
         command.append("--force")
@@ -40,7 +42,7 @@ def transcribe_audio() -> None:
     folder = input("Specific video folder name? Leave blank to transcribe all pending: ").strip()
     force = input("Force re-transcribe existing files? (y/n): ").strip().lower() == "y"
 
-    command = ["python", "scripts/transcribe_audio.py"]
+    command = [PYTHON_EXE, "scripts/transcribe_audio.py"]
 
     if model:
         command.extend(["--model", model])
@@ -64,7 +66,7 @@ def full_pipeline() -> None:
     model = input("Whisper model [base/small/medium/large-v3] (default: base): ").strip()
     force = input("Force overwrite/re-transcribe? (y/n): ").strip().lower() == "y"
 
-    command = ["python", "scripts/transcribe_full.py", url]
+    command = [PYTHON_EXE, "scripts/transcribe_full.py", url]
 
     if model:
         command.extend(["--model", model])
@@ -123,7 +125,7 @@ def analyse_transcript() -> None:
 
     model = input("OpenAI model (default: gpt-4.1-mini): ").strip()
 
-    command = ["python", "scripts/analyse_transcript.py", selected_folder]
+    command = [PYTHON_EXE, "scripts/analyse_transcript.py", selected_folder]
 
     if model:
         command.extend(["--model", model])
