@@ -95,6 +95,7 @@ You can still run each script directly when needed.
 
 Download and extract MP3 audio from a YouTube URL or playlist URL.
 
+**Git Bash**
 ```bash
 python scripts/transcribe_url.py "YOUTUBE_URL"
 ```
