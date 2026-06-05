@@ -43,7 +43,7 @@ Why this is recommended:
 ### 1) Clone repo
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/creative-signal.git
+git clone https://github.com/ScaleK2/creative-signal.git
 cd creative-signal
 ```
 
